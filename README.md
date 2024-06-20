@@ -17,4 +17,4 @@ Team Members:
 > Marcelo Muñoz Wright
 
 Team Leader:
-> Maxi Bianchini
+> Maximiliano Bianchini
