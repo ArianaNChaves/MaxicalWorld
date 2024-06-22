@@ -670,6 +670,7 @@ MonoBehaviour:
   attackRange: 5
   attackSpeed: 10
   rotationSpeed: 20
+  healthMonitorDuration: 20
 --- !u!1 &7122654101855521597
 GameObject:
   m_ObjectHideFlags: 0

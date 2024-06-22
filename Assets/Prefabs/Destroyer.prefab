@@ -252,7 +252,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   attackRange: 5
   attackSpeed: 5
-  healthBar: {fileID: 1076697609666195977}
+  healthMonitorDuration: 5
 --- !u!1001 &4276569144647673718
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -350,17 +350,6 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 1d133c376d2ae8249846b52e9b0ba708, type: 3}
---- !u!114 &1076697609666195977 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 3866443908778333567, guid: 1d133c376d2ae8249846b52e9b0ba708, type: 3}
-  m_PrefabInstance: {fileID: 4276569144647673718}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 319611071dc22234496e4a60666be3e1, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!224 &3275173578909038116 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 1597280328056099154, guid: 1d133c376d2ae8249846b52e9b0ba708, type: 3}

@@ -9,6 +9,7 @@ public class DestroyerMovement : MonoBehaviour, IEnemy, IDamageable
 {
     [SerializeField] private float attackRange;
     [SerializeField] private float attackSpeed;
+    [SerializeField] private float healthMonitorDuration = 10f;
 
     private HealthBar _healthBar;
     private float _damage;
@@ -16,6 +17,7 @@ public class DestroyerMovement : MonoBehaviour, IEnemy, IDamageable
     private int _value;
     private NavMeshAgent _agent;
     private Coroutine _attackCoroutine;
+    private Coroutine _healthMonitorCoroutine;
     private bool _isAttacking = false;
     private Vector3 _destination;
     private GameObject _target;
@@ -40,6 +42,7 @@ public class DestroyerMovement : MonoBehaviour, IEnemy, IDamageable
         GetComponentInChildren<HealthBar>().SetMaxHealthValue(_maxHealth);
         _healthBar.UpdateHealthBar(_health);
         _isDead = false;
+        _healthMonitorCoroutine = StartCoroutine(MonitorHealth());
     }
 
     private void Update()
@@ -62,6 +65,7 @@ public class DestroyerMovement : MonoBehaviour, IEnemy, IDamageable
         _health -= amount;
         _animationsController.Hit();
         _healthBar.UpdateHealthBar(_health);
+        StopCoroutine(_healthMonitorCoroutine);
         if (_health <= 0 && !_isDead)
         {
             Death();
@@ -72,13 +76,14 @@ public class DestroyerMovement : MonoBehaviour, IEnemy, IDamageable
     {
         if (_damageable != null)
         {
+            StopCoroutine(_healthMonitorCoroutine);
             _animationsController.SetMovingState(false);
             _animationsController.Attack();
             _damageable.TakeDamage(_damage);
         }
         else
         {
-            Debug.LogError("Attack() - No se le puede hacer danio: " + currentTarget.name + " - Puede faltar componente IDamageable");
+            Debug.LogError("Attack() - No se le puede hacer daño: " + currentTarget.name + " - Puede faltar componente IDamageable");
         }
         if (currentTarget == null)
         {
@@ -92,8 +97,18 @@ public class DestroyerMovement : MonoBehaviour, IEnemy, IDamageable
         StopAttacking();
         _isDead = true;
         _animationsController.SetDead();
+        //TODO add death bug without AM and CM
         AudioManager.Instance.PlayEffect("Enemy Death");
         CoinManager.Instance.DropCoin(gameObject.transform, _value);
+        EnemyController.Instance.enemiesList.Remove(gameObject);
+        Destroy(gameObject);
+    }
+
+    private void EnemyDeathWhenBugged()
+    {
+        StopAttacking();
+        _isDead = true;
+        _animationsController.SetDead();
         EnemyController.Instance.enemiesList.Remove(gameObject);
         Destroy(gameObject);
     }
@@ -189,9 +204,19 @@ public class DestroyerMovement : MonoBehaviour, IEnemy, IDamageable
     {
         while (_isAttacking)
         {
-            yield return new WaitForSeconds(10/attackSpeed);
+            yield return new WaitForSeconds(10 / attackSpeed);
             Attack(_target);
             //  Debug.Log($"Attack {_target}");
+        }
+    }
+
+    private IEnumerator MonitorHealth()
+    {
+        float initialHealth = _health;
+        yield return new WaitForSeconds(healthMonitorDuration);
+        if (_health == initialHealth && !_isDead)
+        {
+            EnemyDeathWhenBugged();
         }
     }
 }

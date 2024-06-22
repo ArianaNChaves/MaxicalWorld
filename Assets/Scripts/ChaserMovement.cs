@@ -12,7 +12,7 @@ public class ChaserMovement : MonoBehaviour, IEnemy, IDamageable
     [SerializeField] private float attackRange;
     [SerializeField] private float attackSpeed;
     [SerializeField] private float rotationSpeed;
-    
+    [SerializeField] private float healthMonitorDuration = 10f;
     
     private HealthBar _healthBar;
     private float _damage;
@@ -30,7 +30,8 @@ public class ChaserMovement : MonoBehaviour, IEnemy, IDamageable
     private bool _isDead = false;
     private State _state;
     private PlayerController _player;
-        
+    private Coroutine _healthMonitorCoroutine;
+
     private AnimationsController _animationsController;
 
     private enum State
@@ -53,6 +54,7 @@ public class ChaserMovement : MonoBehaviour, IEnemy, IDamageable
             _healthBar.UpdateHealthBar(_health);
             _state = State.Chasing;
             _isDead = false;
+            _healthMonitorCoroutine = StartCoroutine(MonitorHealth());
         }
     
 
@@ -169,6 +171,7 @@ public class ChaserMovement : MonoBehaviour, IEnemy, IDamageable
             _health -= amount;
             _animationsController.Hit();
             _healthBar.UpdateHealthBar(_health);
+            StopCoroutine(_healthMonitorCoroutine);
             if (_health <= 0 && !_isDead)
             {
                 Death();
@@ -186,6 +189,7 @@ public class ChaserMovement : MonoBehaviour, IEnemy, IDamageable
     {
         if (_damageable != null && currentTarget != null)
         {
+            StopCoroutine(_healthMonitorCoroutine);
            // _animationsController.SetMovingState(false);
             _animationsController.Attack();
             _damageable.TakeDamage(_damage);
@@ -238,6 +242,15 @@ public class ChaserMovement : MonoBehaviour, IEnemy, IDamageable
         _animationsController.SetDead();
         AudioManager.Instance.PlayEffect("Enemy Death");
         CoinManager.Instance.DropCoin(gameObject.transform, _value);
+        EnemyController.Instance.enemiesList.Remove(gameObject);
+        Destroy(gameObject);
+    }
+    
+    private void EnemyDeathWhenBugged()
+    {
+        StopAttacking();
+        _isDead = true;
+        _animationsController.SetDead();
         EnemyController.Instance.enemiesList.Remove(gameObject);
         Destroy(gameObject);
     }
@@ -305,6 +318,16 @@ public class ChaserMovement : MonoBehaviour, IEnemy, IDamageable
         {
             Attack(_target);
             yield return new WaitForSeconds(10/attackSpeed);
+        }
+    }
+    
+    private IEnumerator MonitorHealth()
+    {
+        float initialHealth = _health;
+        yield return new WaitForSeconds(healthMonitorDuration);
+        if (_health == initialHealth && !_isDead)
+        {
+            EnemyDeathWhenBugged();
         }
     }
         

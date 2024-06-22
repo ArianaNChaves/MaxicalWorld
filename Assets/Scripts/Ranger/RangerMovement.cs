@@ -23,6 +23,8 @@ namespace Ranger
 
         [SerializeField] private bool isInRange;
         [SerializeField] private bool isVisible;
+        [SerializeField] private float healthMonitorDuration = 10f;
+
         
         private HealthBar _healthBar;
         private float _damage;
@@ -41,6 +43,7 @@ namespace Ranger
         private State _state;
         private float _maxHealth;
         private bool _isDead = false;
+        private Coroutine _healthMonitorCoroutine;
         
         private AnimationsController _animationsController;
         
@@ -65,7 +68,7 @@ namespace Ranger
             GetComponentInChildren<HealthBar>().SetMaxHealthValue(_maxHealth);
             _healthBar.UpdateHealthBar(_health);
             _isDead = false;
-
+            _healthMonitorCoroutine = StartCoroutine(MonitorHealth());
         }
         private void Update()
         {
@@ -98,6 +101,7 @@ namespace Ranger
             _health -= amount;
             _animationsController.Hit();
             _healthBar.UpdateHealthBar(_health);
+            StopCoroutine(_healthMonitorCoroutine);
             if (_health <= 0 && !_isDead)
             {
                 Death();
@@ -108,6 +112,7 @@ namespace Ranger
         {
             if (_damageable != null && currentTarget != null)
             {
+                StopCoroutine(_healthMonitorCoroutine);
                 _animationsController.SetMovingState(false);
                 _animationsController.Attack();
                 GameObject projectile = Instantiate(bulletPrefab, firePoint.position, firePoint.rotation);
@@ -133,6 +138,15 @@ namespace Ranger
             _animationsController.SetDead();
             AudioManager.Instance.PlayEffect("Enemy Death");
             CoinManager.Instance.DropCoin(gameObject.transform, _value);
+            EnemyController.Instance.enemiesList.Remove(gameObject);
+            Destroy(gameObject);
+        }
+        
+        private void EnemyDeathWhenBugged()
+        {
+            StopAttacking();
+            _isDead = true;
+            _animationsController.SetDead();
             EnemyController.Instance.enemiesList.Remove(gameObject);
             Destroy(gameObject);
         }
@@ -338,5 +352,17 @@ namespace Ranger
                 yield return new WaitForSeconds(10/attackSpeed);
             }
         }
+        
+        private IEnumerator MonitorHealth()
+        {
+            float initialHealth = _health;
+            yield return new WaitForSeconds(healthMonitorDuration);
+            if (_health == initialHealth && !_isDead)
+            {
+                EnemyDeathWhenBugged();
+            }
+        }
     }
+    
+    
 }

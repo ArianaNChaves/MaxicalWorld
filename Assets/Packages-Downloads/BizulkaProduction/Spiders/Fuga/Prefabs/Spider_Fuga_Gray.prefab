@@ -616,6 +616,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   attackRange: 7
   attackSpeed: 5
+  healthMonitorDuration: 20
 --- !u!135 &7342178674161627715
 SphereCollider:
   m_ObjectHideFlags: 0

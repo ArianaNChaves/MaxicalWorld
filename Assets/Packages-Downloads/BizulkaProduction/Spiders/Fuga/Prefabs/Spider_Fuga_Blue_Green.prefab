@@ -1342,6 +1342,9 @@ MonoBehaviour:
   bulletPrefab: {fileID: 6605577101491823418, guid: b9e16523ee41c2044bde7ad008592790, type: 3}
   firePoint: {fileID: 8060152081476560661}
   bulletSpeed: 25
+  isInRange: 0
+  isVisible: 0
+  healthMonitorDuration: 20
 --- !u!1001 &1467115024384060558
 PrefabInstance:
   m_ObjectHideFlags: 0
